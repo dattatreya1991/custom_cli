@@ -1,0 +1,7 @@
+Metadata-Version: 2.4
+Name: groq-cli
+Version: 0.1.0
+Summary: Groq CLI
+Requires-Python: >=3.8
+Requires-Dist: groq
+Requires-Dist: requests
