@@ -1,0 +1,12 @@
+
+
+[project]
+name = "groq-cli"
+version = "0.1.0"
+description = "Groq CLI"
+requires-python = ">=3.8"
+dependencies = ["groq","requests"]
+
+[project.scripts]
+groq-cli = "groq_cli:main"
+
