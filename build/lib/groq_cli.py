@@ -345,10 +345,10 @@ def main():
                     continue
                 if len(parts) == 2:
                     search_source = "perplexity"
-                    search_query = parts
+                    search_query = parts[1]
                 else:
-                    search_source = parts.lower()
-                    search_query = parts
+                    search_source = parts[1].lower()
+                    search_query = parts[2]
                 if not search_query:
                     print("Usage: /search [google|perplexity] <your query>")
                     continue
