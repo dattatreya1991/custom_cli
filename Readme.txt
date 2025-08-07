@@ -6,32 +6,42 @@ Step-by-Step Guide to Setting Up Your Custom groq-cli
 Step 1: Prepare Your Project Directory Structure
 Recommended structure:
 
-groq_cli_package/
-  pyproject.toml
-  groq_cli.py
+custom_groq_cli/
+	requirements.txt
+  	Readme.txt
+  	MANIFEST.in
+  	pyproject.toml
+  	groq_cli_package/
+		models.json
+		models.py
+		__init__.py
+		groq_cli.py
+	
 
 ##################################################
 Step 2: Write/Edit pyproject.toml
 Copy this into pyproject.toml in your folder:
 
 ----------------------------------------------Copy below exactly in .toml file-----------------------
-[build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "groq-cli"
 version = "0.1.0"
-description = "Groq CLI with Perplexity Search"
+description = "Groq CLI"
 requires-python = ">=3.8"
-dependencies = [
-    "groq",
-    "requests"
-]
+dependencies = ["groq", "requests"]
+
 [project.scripts]
-groq-cli = "groq_cli:main"
+groq-cli = "groq_cli_package.groq_cli:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+
 ----------------------------------------------------------------------------------------------------
 Add more dependencies as you need.
+
 
 ###############################################
 Step 3: Put Your Code in groq_cli.py
@@ -43,6 +53,7 @@ b. Always ensure at the bottom the below command is present:
 if __name__ == "__main__":
     main()
 ----------------------------------------------------------------------------------------------------
+
 
 ##################################################
 Step 4: Set your API Keys as Environment Variables
@@ -60,6 +71,7 @@ export GOOGLE_CSE_ID="GOOGLE_MAPS_API_KEY_FROM_SAME_PROJECT_ID"
 ---------------------------------------------------------------------------------------------------
 c. Once the above lines are apsted inside the shell file(~/.zshrc file) then activate(bring in effect of new changes), run below command in terminal 
 "source ~/.zshrc"
+
 
 #################################################
 Step 5: Set Up pipx if not installed before
@@ -107,7 +119,7 @@ Edit your pyproject.toml:
 dependencies = [
     "groq",
     "requests",
-    "rich"
+    "new_dependency"
 ]
 -------------------------------------------------------------------------------------------------
 Then run either a1 or a2(preferred):
@@ -125,7 +137,7 @@ Select a model to use (type anything from the name or model ID):
   1. Llama 3.3 70B Versatile (llama-3.3-70b-versatile)
   2. Qwen 3 32B (qwen/qwen3-32b)
   3. Kimi k2 Instruct (moonshotai/kimi-k2-instruct)
-Enter model (name, ID, or number): type either </1>, </kimi> or </llama> etc
+Enter model (name, ID, or number): type either </1>, </kimi> or </llama> etc. (New models can be added and this option can change slightly, take this example as a reference)
 
 b. The below are the actual displayed commands possible in the cli:-
 
