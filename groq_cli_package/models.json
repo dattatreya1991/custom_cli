@@ -1,0 +1,14 @@
+ [
+     { "id": "llama-3.3-70b-versatile", "description": "Llama 3.3 70B Versatile" },
+     { "id": "openai/gpt-oss-120b", "description": "OpenAI 120b" },
+     
+     { "id": "qwen/qwen3-32b",           "description": "Qwen 3 32B" },
+     { "id": "moonshotai/kimi-k2-instruct", "description": "Kimi k2 Instruct" },
+     { "id": "openai/gpt-oss-20b", "description": "OpenAI 20b" },
+     
+     { "id": "gemma2-9b-it", "description": "Google Gemma 2 9b" },
+     { "id": "llama-3.1-8b-instant", "description": "Llama 3.1 8B Versatile" },
+      
+     { "id": "compound-beta", "description": "Groq Compound Beta" }
+     
+]

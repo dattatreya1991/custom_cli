@@ -1,9 +1,0 @@
-README.md
-groq_cli.py
-pyproject.toml
-groq_cli.egg-info/PKG-INFO
-groq_cli.egg-info/SOURCES.txt
-groq_cli.egg-info/dependency_links.txt
-groq_cli.egg-info/entry_points.txt
-groq_cli.egg-info/requires.txt
-groq_cli.egg-info/top_level.txt

@@ -4,6 +4,9 @@ import requests
 import json
 import re
 from groq import Groq
+from .models import AVAILABLE_MODELS
+
+
 
 # ANSI Colors (unchanged)
 BOLD        = '\033[1m'
@@ -21,11 +24,13 @@ ERROR       = '\033[91m'
 PROMPT_COLOR = CYAN
 MODEL_COLOR  = YELLOW
 
+'''
 AVAILABLE_MODELS = [
     ("llama-3.3-70b-versatile", "Llama 3.3 70B Versatile"),
     ("qwen/qwen3-32b", "Qwen 3 32B"),
     ("moonshotai/kimi-k2-instruct", "Kimi k2 Instruct"),
 ]
+'''
 
 def select_model():
     print("\nSelect a model to use (type anything from the name or model ID):")
@@ -74,8 +79,19 @@ def perplexity_search(query, api_key, model="sonar-pro"):
     payload = {
         "model": model,
         "messages": [
+        	{
+        "role": "system",
+        "content": (
+            "You are an expert research assistant and fact-checker. "
+            "When answering queries, always use up-to-date, verified, and reliable information. "
+            "Cite the most relevant sources when possible and avoid speculation. "
+            "Be concise and clear in your responses. "
+            "If you do not know the answer or if information is uncertain, state this explicitly."
+        )
+    },
             {"role": "user", "content": query}
         ],
+        "temperature": 0.2,
         "enable_search_classifier": True
     }
     r = requests.post(url, headers=headers, json=payload)
@@ -132,7 +148,7 @@ def read_file(filename):
     except Exception as e:
         print(f"{ERROR}Error reading file {filename}: {e}{RESET}")
 
-def analyze_file(filename, llm_client, model):
+def analyze_file(filename, llm_client, model, custom_instruction=""):
     try:
         if not os.path.isfile(filename):
             print(f"{ERROR}File not found: {filename}{RESET}")
@@ -157,8 +173,11 @@ def analyze_file(filename, llm_client, model):
                 content_to_check = f.read()
 
         print(f"{CYAN}Analyzing {filename} for errors using the selected model. Please wait...{RESET}")
-        system_prompt = "You are a code review assistant. The following is a file content. Identify any problems, errors, or suspicious code, and suggest improvements if needed."
-        user_prompt = f"File content:\n{content_to_check}"
+        system_prompt = "You are an expert Python and SQL programmer with 20 years of experience. Be rigorous, prioritize correctness, security, always mention any uncertainty about your answer. Recommend memory efficent code wherever its necessary. "
+        if custom_instruction:
+            user_prompt = f"File content:\n{content_to_check}\n\nInstruction: {custom_instruction}"
+        else:
+            user_prompt = f"File content:\n{content_to_check}"
 
         response = llm_client.chat.completions.create(
             model=model,
@@ -173,6 +192,7 @@ def analyze_file(filename, llm_client, model):
     except Exception as e:
         print(f"{ERROR}Error analyzing file: {e}{RESET}")
         return None
+
 
 def write_response_to_file(content, filename):
     ext = os.path.splitext(filename)[1].lower()
@@ -221,7 +241,7 @@ def main():
     print(f"\n{PROMPT_COLOR}{BOLD}Groq CLI Interactive Chat{RESET} [{MODEL_COLOR}{model}{RESET}]. Type 'exit' or Ctrl+C to quit.")
     print("Type /list [dir] to list files/folders (optionally from a certain directory).")
     print("Type /read <filename> to display a file (extracts code from .ipynb).")
-    print("Type /analyze <filename> for LLM code analysis/error detection.")
+    print("Type /analyze <filename> [optional custom instruction] for LLM code analysis/error detection.")
     print("Type /model <model_name/id/number/keyword> any time to switch models.")
     print("Type /search [google|perplexity] <your query> for web search.")
     print("Type /write <outputfile.py|.txt> <instruction with input filename> to generate new code/text and save output to a file (.txt/.py).")
@@ -331,9 +351,15 @@ def main():
                 continue
 
             # --------- Analyze file section ----------
-            if prompt.strip().lower().startswith("/analyze "):
-                filename = prompt.strip()[9:].strip()
-                response_content = analyze_file(filename, client, model)
+            if prompt.strip().lower().startswith("/analyze"):
+                # Allow '/analyze filename' OR '/analyze filename some custom instruction'
+                parts = prompt.strip().split(maxsplit=2)
+                if len(parts) < 2:
+                    print(f"{ERROR}Usage: /analyze <filename> [optional instruction]{RESET}")
+                    continue
+                filename = parts[1]
+                custom_instruction = parts[2] if len(parts) > 2 else ""
+                response_content = analyze_file(filename, client, model, custom_instruction)
                 last_response = response_content
                 continue
 
@@ -369,7 +395,7 @@ def main():
                             snippet = item.get("snippet", "")
                             print(f"{BOLD}{YELLOW}Result {idx}:{RESET} {title}\n  {BRIGHT_CYAN}{link}{RESET}\n  {GRAY}{snippet}{RESET}\n")
                         summarize_input = "\n".join(f"{item.get('title','')}: {item.get('snippet','')}" for item in items[:3])
-                        system_prompt = "Summarize these Google Search results to a concise answer based only on their combined facts."
+                        system_prompt = "SAs an unbiased research assistant, carefully summarize only verifiable, factual statements from the following Google results."
                         try:
                             summary_response = client.chat.completions.create(
                                 model=model,
@@ -421,11 +447,12 @@ def main():
             user_prompt, target_filename = extract_filename_from_prompt(prompt)
             if not user_prompt:
                 continue
-
+            
+            system_prompt = "You are a helpful, precise, and honest assistant. Always reference your reasoning, be concise, and admit if you are unsure."
             try:
                 response = client.chat.completions.create(
                     model=model,
-                    messages=[{"role": "user", "content": user_prompt}],
+                    messages=[{"role": "system", "content": system_prompt},{"role": "user", "content": user_prompt}],
                 )
                 content = response.choices[0].message.content
                 print(f"{GREEN}Groq:{RESET}")

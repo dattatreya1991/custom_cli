@@ -1,0 +1,2 @@
+recursive-include groq_cli_package *.json
+
